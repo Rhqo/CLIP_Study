@@ -1,6 +1,14 @@
 # Learning Transferable Visual Models From Natural Language Supervision
-https://github.com/OpenAI/CLIP.
+
 ### Abstract
+
+CLIP (Contrastive Language-Image Pre-Training)은 4억 개의 텍스트-이미지 쌍으로 학습되었으며, 사전 학습된 모델을 다양한 이미지 인식 데이터셋에서 제로샷(Zero-Shot)으로 적용할 수 있다. 
+
+CLIP이 30개의 다양한 이미지 분류 데이터셋에서 높은 성능을 발휘하며, 특히 제로샷 학습에서 경쟁력 있는 성능을 보이는 것을 확인했다. 또한, CLIP은 다양한 인식 작업에 있어 기존의 최첨단 모델들과 비교해도 우수한 성능을 나타냈다.
+
+### Keywords
+
+[Keywords](./subpages/Keywords.md)
 
 # 1. Introduction and Motivating Work
 
