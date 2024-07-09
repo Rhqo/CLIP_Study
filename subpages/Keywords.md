@@ -1,7 +1,7 @@
 # Keywords
 
-## **Representation Learning**
-
+### Representation Learning
+```
 데이터의 특징을 유용한 형식으로 변환하는 것을 목표로 하는 머신 러닝 기법
 
 원본 데이터(예: 이미지, 텍스트)로부터 중요한 특징을 추출하여 저차원 또는 고차원 벡터(임베딩)를 생성한다.
@@ -21,10 +21,11 @@
     - 사전 학습된 모델의 표현을 다른 다운스트림 작업에 적용하여, 전이 학습(transfer learning)을 용이하게 합니다.
 
 가 있다.
+```
 
-## **Self-supervised Learning**
-
-Label 없이 input 내에서 target으로 쓰일만 한 것을 정해서, 즉 self로 task를 정해서 supervision방식으로  모델을 학습
+### Self-supervised Learning
+```
+Label 없이 input 내에서 target으로 쓰일만 한 것을 정해서, 즉 self로 task를 정해서 supervision방식으로 모델을 학습
 
 일부러 어떤 구실을 만들어서 푸는 문제, pretext task라고 한다.
 
@@ -33,9 +34,10 @@ Label 없이 input 내에서 target으로 쓰일만 한 것을 정해서, 즉 se
 Unlabelled dataset으로부터 좋은 representation을 얻고자 하는 학습 방식.
 
 representation learning의 일종.
+```
 
-## **Contrastive Learning**
-
+### Contrastive Learning
+```
 서로 다른 데이터 포인트 간의 유사성 학습
 
 - 긍정 쌍(Positive Pair): 서로 관련 있는 데이터 포인트 (예: 같은 이미지의 두 다른 뷰).
@@ -48,9 +50,9 @@ representation learning의 일종.
 Self-supervised learning의 일종.
 
 본 논문에서는 Contrastive learning을 사용하여, 관련 있는 텍스트와 이미지의 임베딩이 가깝도록 학습된다.
-
-## **Pretext task**
-
+```
+### Pretext task
+```
 모델이 유용한 표현(특징)을 학습하기 위해 수행하는 초기 학습 과제
 
 주로 self-supervised learning에서 사용되며, 레이블이 없는 데이터로부터 의미 있는 표현을 학습하기 위해 설계된다. 
@@ -58,9 +60,9 @@ Self-supervised learning의 일종.
 전처리 과제는 본래의 목적과는 다른, 하지만 표현 학습에 도움이 되는 간단한 작업을 의미한다.
 
 본 논문에서는 텍스트-이미지 쌍의 contrastive learning을 pretext task로 사용한다.
-
-## **Downstream task**
-
+```
+### Downstream task
+```
 모델이 pretext task를 통해 학습한 표현을 실제로 활용하는 본래의 목적 작업
 
 전처리 과제를 통해 학습된 모델의 임베딩을 사용하여, 특정 작업을 수행
@@ -73,9 +75,10 @@ Self-supervised learning의 일종.
 - Image classification: 임베딩을 사용하여 이미지 분류 작업을 수행. pretext task를 통해 학습한 표현을 활용하여 높은 성능을 발휘한다.
 
 를 downstream task로 사용한다.
-
-## Natural Language Supervision
-
+```
+### Natural Language Supervision
+```
 텍스트를 사용하여 모델을 학습시키는 방법
 
 텍스트 데이터를 라벨로 사용하여 이미지 데이터를 설명하고, 이를 기반으로 모델을 학습시킨다.
+```
