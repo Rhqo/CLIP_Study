@@ -18,13 +18,71 @@ CLIP이 30개의 다양한 이미지 분류 데이터셋에서 높은 성능을 
 
 자연어 감독에서 학습하는 방법을 설명합니다. 이미지와 텍스트를 결합하여 지각 학습을 수행하는 기존 연구들과의 차이점을 강조합니다.
 
+Training signa로써의 자연어를 이해하는 것.
+
+원래는 토픽 모델과 n-그램 표현을 사용할 때 자연어의 복잡성으로 어려움을 겪었지만, 심층 컨텍스트 표현 학습(Word2Vec 등)의 개선은 이제 이 풍부한 감독 소스를 효과적으로 활용할 수 있는 도구를 갖게 되었음.
+
+자연어를 통한 학습은 다른 훈련 방법에 비해 몇 가지 잠재적 강점이 있습니다. 
+
+- 표준 N의 다수결 "골드 라벨"과 같은 고전적인 "기계 학습 호환 형식"에 주석이 필요하지 않기 때문에 이미지 분류를 위한 표준 크라우드 소스 라벨링에 비해 자연어 감독을 확장하는 것이 훨씬 쉽습니다. 대신 자연어에서 작동하는 방법은 인터넷의 방대한 텍스트에 포함된 감독에서 수동적으로 학습할 수 있습니다.
+- 자연어를 통한 학습은 표현을 "단순히" 학습할 뿐만 아니라 해당 표현을 유연한 제로샷 전송을 가능하게 하는 언어에 연결한다는 점에서 대부분의 비지도 또는 자체 감독 학습 접근 방식에 비해 중요한 이점이 있습니다.
+
 ## 2.2 Creating a Sufficiently Large Dataset
 
 대규모 데이터셋을 생성하는 과정과 그 중요성에 대해 설명합니다. 4억 개의 이미지-텍스트 쌍으로 이루어진 데이터셋을 만들고 이를 통해 모델의 성능을 높이는 방법을 제시합니다.
 
+기존 작업은 주로 MS-COCO, Visual Genome, YFCC100M의 세 가지 데이터 세트를 사용했다.
+
+MS-COCO와 Visual Genome은  100,000장의 훈련 사진으로 데이터셋의 크기가 충분하지 않다.
+
+YFCC100M은 1억 장의 사진으로 데이터셋의 크기가 꽤 크지만, 각 이미지에 대한 메타데이터는 희소하고 품질이 다양합니다. 이 데이터셋 중 자연어 제목 및/또는 설명이 있는 이미지만 영어로 유지하도록 필터링한 후 데이터 세트는 600~1,500만 장의 사진으로 축소되었다. 이는 이미지넷과 거의 동일한 크기이다.
+
+자연어 감독의 주요 동기는 인터넷에서 공개적으로 사용할 수 있는 이러한 형태의 많은 양의 데이터이다. 기존 데이터 세트는 이러한 가능성을 적절하게 반영하지 못하기 때문에 이에 대한 결과만 고려하면 이 연구 라인의 잠재력을 과소평가할 수 있다.
+
+이를 해결하기 위해 인터넷에서 공개적으로 사용 가능한 다양한 소스에서 수집된 4억 개의 (이미지, 텍스트) 쌍으로 구성된 새로운 데이터 세트를 구성했다. 
+
+가능한 한 광범위한 시각적 개념을 다루기 위해 텍스트가 500,000개의 쿼리 세트 중 하나를 포함하는 (이미지, 텍스트) 쌍을 구성 프로세스의 일부로 검색한다.
+
+1 쿼리당 최대 20,000개의 (이미지, 텍스트) 쌍을 포함하여 결과의 균형을 대략적으로 조정합니다. 
+
+결과 데이터 세트는 GPT-2를 훈련하는 데 사용되는 웹텍스트 데이터 세트와 유사한 총 단어 수를 가지고 있다.
+
+이 데이터 세트는 WebImageText의 WIT이다.
+
 ## 2.3 Selecting an Efficient Pre-Training Method
 
 효율적인 사전 학습 방법을 선택하는 과정과 그 이유를 설명합니다. ConVIRT의 단순화 버전인 CLIP을 사용하여 자연어 감독을 효과적으로 학습할 수 있음을 보여줍니다.
+
+훈련의 효율이 natural language supervision의 key가 될 것이라고 생각했다.
+
+처음에는 image CNN과 text transformer를 사용했는데, 너무 효율이 좋지 못했다.
+
+그래서 단어의 “정확한”의미를 예측하기보다는 contrastive learning을 사용해, 단어가 정확히 일치하지 않아도 되도록 했다.
+
+그리고 N쌍의 positive pair 과 N^2-N의 negative pair의 모든 계산을 하는 것도 비효율적이므로, 
+
+- symmetric cross entropy loss
+- batch construction technique and objective (= InfoNCE loss)
+
+를 사용해 이 유사도를 최적화했다.
+
+큰 데이터를 사용하기 때문에, overfitting은 큰 문제가 되지는 않을 것이다.
+
+ImageNet과 Text encoder의 pre-trained weight를 (initializing 없이) 그대로 사용했다.
+
+Representation과 contrastive embedding space에 non-linear projection 대신 linear projection을 사용한다.
+
+linear 이든 non-linear 이든 training efficiency에는 차이가 없었지만, non-linear는 self-supervised learning에서’만’ 현재 이미지의 세부 정보와 함께 사용할 수 있다고 추측했다.
+
+단일 문장을 균일하게 샘플링하는 텍스트 변환 함수 $t_u$를 제거, 이미지 변환 함수 $t_v$를 단순화하였다.
+
+크기가 조정된 이미지의 random 사각형 crop이 훈련중의 유일한 데이터 증강이다.
+
+Softmax의 logits를 조정하는 temperature parameter $\tau$가 hyperparameter가 되는 것을 피하기 위해 log-parameterized된 곱셈 스칼라로 훈련 중에 최적화된다. (logits는 softmax의 입력, 각 클래스에 대한 스코어)
+
+→ $\tau$가 hyperparameter가 되는 것을 피해야 하는 이유 : 학습 과정의 복잡성 감소, 자동 조정, 일관성 유지 (?)
+
+→ log-parameterized multiplicative scalar는 $\tau$를 학습 가능한 파라미터로 만드는 한 가지 방법, $\tau$를 직접 학습하는 대신, $\tau$의 로그 값을 학습하며, $\tau$가 입력 logits에 곱해지는 형태가 되도록 사용된다.
 
 ## 2.4 Choosing and Scaling a Model
 
