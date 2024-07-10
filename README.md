@@ -145,6 +145,18 @@ ViT/14 모델에 추가적인 336 pixel resolution의 pre-train (1 epoch)의 과
 
 > CLIP을 제로샷 전이에 사용하는 방법을 설명합니다. 다양한 데이터셋에서의 성능 평가 결과를 제시합니다.
 
+CLIP은 image와 text 조각이 데이터셋 안에서 쌍으로 존재하는지에 대해 예측하도록 pre-train되어 있다.
+
+각각의 데이터셋에서, 모든 class를 사용하여 잠재적인 text 쌍을 찾고, CLIP을 통해 가장 적절한 쌍이 무엇인지 예측한다.
+
+1. 각각의 encoder로부터 image와 possible text들의 집합을 embedding한다.
+2. 이 embedding들의 cosine similarity를 측정하고, $\tau$로 scaling, softmax로부터의 확률분포로 normalize된다.
+    (이 예측 layer는 L2-normalized input, L2-normalized weights, no bias, temperature scaling이 된 multinomial logistic regression classifier 이다.)
+    이렇게 해석하면 image encoder는 이미지에 대한 특징 표현을 계산하는 컴퓨터 비전 backbone이고,    
+    text encoder는 클래스가 나타내는 시각적 개념을 지정하는 텍스트를 기반으로 선형 분류기의 가중치를 생성하는 hyper network 라고 볼 수 있다.
+
+CLIP pre-training의 모든 step은 class당 1개의 예제를 포함하고 자연어 설명을 통해 정의된 32,768개의 총 class가 있는 컴퓨터 비전 dataset에 무작위로 생성된 proxy의 성능을 최적화하는 것으로 볼 수 있다.
+
 ### 3.1.3 Initial Comparison to Visual N-Grams
 
 > Visual N-Grams와의 초기 비교 결과를 제시합니다. CLIP의 우수한 성능을 강조합니다.
