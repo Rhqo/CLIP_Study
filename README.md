@@ -111,6 +111,28 @@ Text encoder는 width만 비례적으로 증가시켰다. 텍스트 인코더의
 
 > 모델 훈련 과정에 대해 설명합니다. 5개의 ResNets와 3개의 Vision Transformers를 사용하여 모델을 훈련시키고, 이를 통해 CLIP의 강력한 성능을 입증합니다.
 
+ResNet → RN 50, 101, x4, x16, x64
+
+Vision Transformer → ViT /32, /16, /64
+
+들을 사용하여, 32 epoch씩 학습시켰다.
+
+Optimizer는 Adam을 사용하는데, decoupled weight decay regularization 방법과 learning rate를  cosine schedule에 따라 감소시키는 방법을 활용하였다.
+
+Hyperparameter들은  gird searches, random search의 합성, ResNet-50으로 1 epoch실행해봤을때의 결과로 manual tuning된 것으로 설정하였다.
+
+Temperature $\tau$의 초기값으로 0.07
+
+Mini-batch의 크기는 32,768
+
+Mixed-precision (계산 일부를 더 낮은 정밀도로 계산) 하여 훈련을 가속화하고 메모리를 아꼈다.
+
+이외에도 gradient checkpointing, half-precision Adam statistics, half-precision stochastically rounded text encoder weights로 메모리를 아꼈다.
+
+Embedding similarity의 계산은 local embedding batch에 필요한 pairwise similarity의 하위 집합만 계산하는 개별 GPU에서도 공유되었다.
+
+ViT/14 모델에 추가적인 336 pixel resolution의 pre-train (1 epoch)의 과정을 거쳐 ViT/14@336px 모델을 추가하였고, 이 모델이 가장 높은 성능을 보였다.
+
 # 3. Experiments
 
 ## 3.1 Zero-Shot Transfer
