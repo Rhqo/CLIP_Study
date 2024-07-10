@@ -196,7 +196,40 @@ Ensemble을 embedding space가 아닌, probability space 위에서 구성하였�
 
 ### 3.1.5 Analysis of Zero-Shot CLIP Performance
 
-> 제로샷 CLIP 성능 분석 결과를 제시합니다. 다양한 작업에서의 성능을 평가합니다.
+> 제로샷 CLIP의 특성과 성능 분석 결과를 제시합니다. 다양한 작업에서의 성능을 평가합니다.
+
+Zero-shot CLIP vs ResNet-50
+
+    Fully supervised, regularize 된 logistic regression classifier를 사용한 ResNet-50과 zero-shot CLIP을 비교했다.
+    CLIP의 성능이 높은 데이터셋도 있고, ResNet의 성능이 높은 데이터셋도 있었다. 이 차이를 WIT와 ImageNet 간의 task별 다양한 감독량 차이에 있다고 보았다.
+    CLIP과 ResNet의 성능이 비슷한 datasets:  “일반적인” object classification datasets
+    ex) ImageNet, CIFAR, STL, PascalVOC
+    CLIP이 ResNet에 비해 성능이 뛰어난 datasets: video에서 액션 인식을 측정하는 datasets
+    ImageNet의 명사 중심 객체 감독에 비해 자연어가 동사와 관련된 시각적 개념에 대한 더 넓은 감독을 제공하는 것이라고 추측했다.
+    CLIP이 ResNet에 비해 성능이 떨어지는 datasets: specialized, complex, abstract datasets
+    ex) 위성 이미지 (EuroSAT, RESISC45), 림프 노드 종양 탐지 (PatchCamelyon), …
+    CLIP이 수행한 classification에 대해서, 
+    비전문가인 사람은 갯수를 세거나, 위성 이미지 분류, 교통 표지판 인식과 같은 작업들을 수행할 수 있으므로, 개선의 여지가 있지만, 
+    림프절 종양 분류와 같이 학습자가 이전에 경험한 적이 없는 어려운 작업에 대해 제로샷 전송을 측정, 평가하는 것은 의미있는 평가가 아닐 수 있다.
+
+Zero-shot CLIP vs Few-shot CLIP
+
+    Zero-shot의 한계 때문에, zero-shot CLIP과 ResNet을 비교하는 것 보다, few-shot을 비교하는 것이 더 직접적인 비교가 될 것이다.
+    Zero-shot CLIP이 의외로 4-shot CLIP과 성능이 비슷했다. 이는, "정상적인" 지도 학습은 훈련 예제에서 간접적으로 개념을 추론해야 하는데, 문맥이 없는 예제 기반 학습은 (특히 원샷의 경우) 데이터와 일치할 수 있는 다양한 다른 가설이 있다는 단점이 있다. 또한, 하나의 image에 다른 다양한 개념이 담긴 경우, image의 주요 대상이 될 것이라고 가정할 순 있지만, 보장할 순 없다.
+    잠재적 해결책은 zero-shot classifier를 few-shot classifier의 weight에 대한 선행으로 사용하는 것이다.
+    생성된 weight에 L2 penalty만 추가하면 이를 구현할 수 있지만, 하이퍼파라미터 최적화 과정에서 regularizer의 큰 값만 선택될 수 있고, 이는 few-shot이 zero-shot이 되게 만든다. Zero-shot CLIP과 few-shot CLIP을 유연하게 결합하는 것은 향후 연구에서 다루어져야 할 것이다.
+
+Zero-shot CLIP vs Few shot logistic regression (BiT-M, SimCLRv2)
+
+    Zero-shot CLIP과 다른 few shot 모델을 비교했을 때에는, 16-shot과 비슷한 성능을 보였다.
+    독립적인 데이터셋에서 각각 비교해 보면, zero-shot CLIP이 성능이 뛰어나다는 것을 확인할 수 있다. 표는 해당 모델이 각각의 데이터셋에 대해서 몇 번의 shot을 가져야 CLIP과 비슷해질지 나태나는 지표이다.
+    다른 평가 dataset이 커서 훈련이 잘 이루어진다면, zero-shot CLIP 또한 linear classifier이기 때문에, 다른 fully-supervised linear classifier가 zero-shot CLIP의 상한이 될 것이다.
+    다름 그래프에서 zero-shot CLIP이 fully-supervised classifier보다 10~20%정도 낮은 성능을 보임을 알 수 있다.
+    r = 0.82는 CLIP이 underlying representation과 task 학습을 zero-shot 연결하는 데 비교적 일관성이 있음을 의미한다.
+    또한, zero-shot CLIP이 STL10, CIFAR10, Food101, OxfordPets, Caltech101 5가지 dataset에서는 fully-supervised classifier과 비슷한 성능을 내는데, 이는 underlying representation의 퀄리티가 높아서 그랬을 것이라고 추측된다.
+    또한, fully-supervised classifier가 1% 성능이 향상될 때 마다, zero-shot CLIP은 1.28% 성능이 향상된다. 
+
+지난 연구들에 따르면, 모델의 성능은
 
 ## 3.2 Representation Learning
 
