@@ -161,9 +161,38 @@ CLIP pre-training의 모든 step은 class당 1개의 예제를 포함하고 자�
 
 > Visual N-Grams와의 초기 비교 결과를 제시합니다. CLIP의 우수한 성능을 강조합니다.
 
+CLIP은 Visual N-Grams에 비해 상당히 좋은 성능을 가지고 있다.
+
+하지만, Visual N-Grams와의 비교는 CLIP의 성능을 맥락화하기 위한 것으로, 두 시스템 간의 직접적인 방법 비교로 해석해서는 안 된다.
+
+- 본 연구에서는 10배 더 큰 데이터셋을 훈련에 사용하고,
+- 예측당 거의 100배 더 많은 컴퓨팅을 요구하는 비전 모델을 사용하며,
+- Visual N-Grams가 출판될 당시 존재하지 않았던 Transformer 기반 모델을 사용하는
+
+등 두 시스템 간의 많은 성능 관련 차이점들이 통제되지 않았기 때문이다.
+
 ### 3.1.4 Prompt Engineering and Ensembling
 
 > 프롬프트 엔지니어링과 앙상블 방법을 사용하여 CLIP의 성능을 최적화하는 과정을 설명합니다.
+
+Issue 1: 단어의 다의성
+
+Class의 이름이 CLIP의 encoder에 전해지는 유일한 정보일 때, 문맥 부족으로 어떤 의미의 단어가 사용되는지 구분이 불가능하다. 여러 의미를 가진, 같은 단어가 다른 class로 분류되는 문제가 발생된다.
+ex) 날고 있는 두루미와, 두루미 2개의 image가 서로 다른 class로 분류된다.
+ex) 복서 image가 복서가 아닌, 운동선수라고 분류된다.
+
+Issue 2: text는 full sentence 인데 반해, image는 single word이다.
+text는 image를 묘사하는 어떤 문장이 될 것이고, image는 해당 class를 표현하는 어떤 한 단어일 가능성이 높다. 이를 해결하기 위해 “A photo of a {label}.”과 같은 prompt 템플릿을 사용했고, 이것이 실제로 성능을 향상시켰다.
+
+이 관점에서, 우리는 task에 맞게 prompt를 조정하는 prompt engineering을 통해 zero-shot 성능 또한 발전시킬 수 있음을 확인했다.
+ex) Specify the category: “A photo of a {label}, a type of pet.”
+ex) Put quotes around the text or number: “a satellite photo of a {label}.”
+
+또한, 여러 zero-shot classifier를 ensemble 하여 성능을 발전시킬 수 있음을 경험했다.
+“A photo of a big {label}.” and “A photo of a small {label}.”
+Ensemble을 embedding space가 아닌, probability space 위에서 구성하였다.
+
+종합하면, prompt engineering과 ensembling을 사용하여 3.5% 이상의 성능 향상을 이뤘다.
 
 ### 3.1.5 Analysis of Zero-Shot CLIP Performance
 
