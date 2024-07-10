@@ -88,6 +88,25 @@ Softmax의 logits를 조정하는 temperature parameter $\tau$가 hyperparameter
 
 > 모델을 선택하고 확장하는 과정에 대해 설명합니다. 다양한 컴퓨팅 규모에서 모델을 훈련시켜 전이 성능을 분석합니다.
 
+첫번째 image encoder로는 ResNet-50과 ResNet-D를 사용한 변형을 사용했는데,
+global average pooling layer를 attention pooling mechanism으로 바꿨다. 
+이 attention pooling mechanism은 transformer style의 multi-head attention으로서 작동한다.
+이 attention에서 query는 global average pooling된 표현을 기반으로 한다.
+
+두번째 image encoder로는 Vision Transformer(ViT)를 사용했는데, 
+transformer전의 patch와 position embedding을 결합하여 추가적인 layer normalization을 사용했고,
+약간 다른 initialization 체계를 사용했다.
+
+Text encoder로는 Transformer를 사용했다.
+63M개의 paramter, 12개의 layer, 512의 각 layer의 폭, 8개의 attention head를 가지고 있고,
+모든 문자를 소문자로 처리, PBE(byte pair encoding)을 사용하여 tokenization되고,
+49,512의 어휘 크기를 가지며, max sequnce length는 76 token이다.
+text의 feature representation들은 layer normalize된 후 multi-modal embedding space에 linear projection된다. 
+
+기존의 computer vision model들은 width, depth를 ‘독립적’으로 증가시켜 모델 파라미터를 증가시켰지만, 
+본 논문의 image encoder는 width, depth, resolution을 계산하여 한번에 증가시키는 방법이 개발되어 이를 사용하였다.
+Text encoder는 width만 비례적으로 증가시켰다. 텍스트 인코더의 용량(depth)가 성능에 덜 민감하기 때문이다.
+
 ## 2.5 Training
 
 > 모델 훈련 과정에 대해 설명합니다. 5개의 ResNets와 3개의 Vision Transformers를 사용하여 모델을 훈련시키고, 이를 통해 CLIP의 강력한 성능을 입증합니다.
