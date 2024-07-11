@@ -294,6 +294,74 @@ CLIP 모델은 무작위 초기화로부터 끝까지 훈련된 단일 컴퓨터
 
 > 자연스러운 분포 변화에 대한 견고성을 평가한 결과를 설명합니다. CLIP의 강력한 성능을 입증합니다.
 
+2015년에는 ImageNet의 성능이 인간을 능가한다는 평가 통계가 있었다. 새로운 벤치마크가 생긴 뒤에는 ImageNet과 인간의 정확도가 많이 줄어들었다. 왜 이런 차이가 발생했을까?
+
+딥러닝 모델은 dataset에서 상관관계와 패턴을 찾는 것을 목표로 한다. 하지만, 많은 상관관계와 패턴들이 사실은 거짓된 것이었고, 다른 분포에서는 적용되지 않는다는 것을 발견했다.
+
+ImageNet에 대한 7가지 natural distribution shift를 설정하고, 이에 대한 평가를 진행한다.
+
+Robustness를 분석하는 2가지 기준이 있다.
+
+- Effective robustness: 원래의 훈련 데이터와 분포가 다른 새로운 데이터, 환경에서 얼마나 잘 작동하는지, in-distribution과 out-of-distribution의 정확도의 개선을 포착
+- Relative robustness: 특정 기준 모델이나 다른 모델들과 비교하여 상대적으로 얼마나 강건한지, out-of-distribution 정확도의 모든 개선을 포착
+    - In-distribution: 모델이 훈련된 데이터와 동일하거나 매우 유사한 분포를 가진 데이터
+    - out-of-distribution: 모델이 훈련된 데이터와 다른 분포를 가진 데이터
+
+ImageNet dataset distribution에 대한 training 또는 adaptation이 관찰된 robustness의 차이 때문인가?
+
+직관적으로, zero-shot 모델은 특정 분포에 대해 학습하지 않았기 때문에, 해당 분포의 가짜 상관관계, 패턴을 파악하지 못해야 한다.
+
+하지만, 그렇기 때문에 zero-shot모델에서 높은 effective robustness를 기대할 수 있다.
+
+그래서 본 연구에서는 7가지의 natural distribution shift된 ImageNet model과 zero-shot CLIP 모델의 성능을 비교했다.
+
+Zero-shot CLIP이 더 견고함을 확인할 수 있었지만, 이는 supervised learning이 robustness 차이를 발생시킨다는 의미는 아니다. CLIP의 크기가 다양한 pre-training dataset과 natural language supervision 또한 그 차이를 발생시켰을 것이다.
+
+이를 알아보기 위해, CLIP을 ImageNet training dataset에 맞는 L2 regularized logistic regression classifier를 통해 ImageNet의 distribution에 적응한 후, zero-shot CLIP과 비교해 보았다.
+
+이는 ImageNet 정확도를 전반적으로 9.2에서 85.4% 올렸고, 2018의 SOTA와 맞먹는 성능을 보였다.
+
+이는 놀라운 발전이지만, distribution shift에 대한 평균 performance 향상으로 이어지지는 않는다. 
+
+또한 Figure 14에서 dataset당 zero-shot 정확도와 linear classifier의 정확도의 차이를 분석한 결과, 하나의 데이터 세트인 ImageNetV2에서 성능이 여전히 크게 향상되는 것으로 나타났습니다.
+
+ImageNetV2는 기존 ImageNet dataset의 distribution과 가장 유사하며, supervised adaptation으로 인한 정확도 향상이 ImageNet의 분포에 밀접하게 집중되어 있음을 의미한다. ImageNet-R, ObjectNet, ImageNet Sketch, ImageNet-A 도 이와 유사하게 ImageNet과의 분포차이가 4%내이다.
+
+Youtube-BB와 ImageNet Vid의 정확도 변화는 매우 중요하다.
+
+이에 따라 다음과 같은 질문을 던질 수 있다.
+
+- Distribution shift 되어서 정확도가 거의 또는 전혀 증가하지 않으면서 ImageNet dataset에서 정확도를 9.2% 향상시킬 수 있는 방법은 무엇인가
+- 주로 "가짜 상관 관계 이용"에서 얻을 수 있는 이점은 무엇인가
+- 이 동작은 CLIP, ImageNet dataset 및 연구된 distribution shift의 일부 조합에 고유합니까, 아니면 보다 일반적인 현상인가
+- linear classifier뿐만 아니라 end-to-end fine-tuning에도 적용되는가
+
+현재로서는 이러한 질문에 대한 확실한 답변을 가지고 있지 않다. 
+
+또한 flexible한 zero-shot natural language 기반 image classifier를 통해 가능한 또다른 robustness의 개입을 조사한다.
+
+Youtube-BB와 ImageNet-Vid는 ImageNet의 super-class(상위 클래스)로 구성되어 있다.
+
+ImageNet 모델의 고정된 1000개 클래스 분류기를 사용하여 예측하려고 할 때 문제가 발생하는데, 
+
+과거 연구에서는 ImageNet 클래스 계층에 따라 모든 하위 클래스에 대한 예측을 최대 풀링(max-pooling)하여 이 문제를 해결했다. 그러나 이 맵핑은 완벽하지 않다. 예를 들어, Youtube-BB의 person 클래스는 baseball player, bridegroom, scuba diver 등의 ImageNet class들로부터 예측을 풀링해야 한다.
+
+여기서, CLIP을 사용하면 각 데이터셋의 클래스 이름을 직접 기반으로 맞춤형 zero-shot classifier를 생성할 수 있는데, 이는 고정된 ImageNet 클래스 맵핑의 문제를 해결하는 데 도움이 됩니다.
+
+이는 ImageNet에서 평균적으로 effective robustness가 5%정도 증가하지만, 몇몇 데이터에서만 큰 개선이 이루어졌다. 
+
+ObjectNet에서도 정확도가 2.3% 향상되었다. ObjectNet의 클래스가 ImageNet 클래스와 밀접하게 겹치도록 설계되었지만, 여전히 ObjectNet 클래스 이름을 사용하는 것이 ImageNet 클래스 이름을 사용하고 필요할 때 예측을 풀링하는 것보다 조금 더 도움이 될 것이다.
+
+이렇게 zero-shot 설정에서 CLIP 모델은 강인성이 향상됨을 보았고, 이는 CLIP이 기존 모델보다 더 유연하게 다양한 dataset에 대응할 수 있음을 의미한다.
+
+하지만, fully-supervised learning 설정에서는 이러한 이점이 거의 사라진다. Figure 14에서는 이를 확인할 수 있다. 
+
+Adapt to class shift가 위 문단에서 언급한, 고정된 1000개의 class classifier를 사용하는 것 대신 CLIP을 사용하여 맞춤형 zero-shot classifier를 생성하는 것이고,
+
+Adapt to ImageNet이 fully-supervised learning에 해당하는 것으로, CLIP의 이점이 거의 사라지는 모습을 볼 수 있다.
+
+위의 실험들을 요약하자면, 높은 효과적 강인성은 모델이 접근할 수 있는 특정 distribution (training data)의 양을 최소화하는 것에서 비롯됩니다. 그러나 이는 데이터셋 특정 성능을 감소시키는 비용이 따릅니다.
+
 # 4. Comparison to Human Performance
 
 > 인간 성능과의 비교 결과를 설명합니다. CLIP이 인간과 유사한 수준의 성능을 발휘할 수 있음을 보여줍니다.
