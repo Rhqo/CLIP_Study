@@ -229,7 +229,7 @@ Zero-shot CLIP vs Few shot logistic regression (BiT-M, SimCLRv2)
     또한, zero-shot CLIP이 STL10, CIFAR10, Food101, OxfordPets, Caltech101 5가지 dataset에서는 fully-supervised classifier과 비슷한 성능을 내는데, 이는 underlying representation의 퀄리티가 높아서 그랬을 것이라고 추측된다.
     또한, fully-supervised classifier가 1% 성능이 향상될 때 마다, zero-shot CLIP은 1.28% 성능이 향상된다. 
 
-지난 연구들에 따르면, 모델의 성능은
+지난 연구들에 따르면, 딥러닝 모델의 성능은 training compute와 dataset size로 예측이 가능하다는 결과가 있었다. 이에 따라 GPT 모델들의 zero-shot  훈련의 계산량(비용)의 성능이 1000배 증가했다. 이를 바탕으로 CLIP을 평가해보았을 때, CLIP은 44배 증가했다.
 
 ## 3.2 Representation Learning
 
