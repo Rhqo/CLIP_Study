@@ -235,6 +235,61 @@ Zero-shot CLIP vs Few shot logistic regression (BiT-M, SimCLRv2)
 
 > 표현 학습에 대한 실험 결과를 설명합니다. CLIP이 다양한 작업에서 강력한 표현을 학습할 수 있음을 보여줍니다.
 
+3.1에서 CLIP의 task-learning에 관한 능력을 다뤘다면, 이번 장에서는 CLIP의 representation 능력을 다룬다.
+
+이상적인 표현 뿐 만 아니라, 표현의 품질 또한 평가대상이 된다.
+
+1. 모델로부터 추출한 representation에 linear classifier를 맞추고 다른 dataset들에서 성능을 평가(일반적)
+2. 모델의 end-to-end fine-tuning된 모델을 평가
+
+2번째 평가방법이 flexibility를 높이고, fine-tuning이 대부분의 dataset에서 linear classifier의 성능을 능가한다.
+
+실용적으로는 fine-tuning을 사용하는 것이 맞지만, 본 연구에서는 몇가지 이유 때문에 linear classifier를 사용할 예정이다.
+
+우리는 high-performing task, dataset에 구애받지 않는 pre-training 접근방식을 연구하는 데 중점을 가지고 있는데, fine-tuning은 각 dataset에 대한 표현을 조정하기 때문에 pre-training 단계에서 일반적이고 강건한 representation을 학습하기 위해 실패를 보상하고 잠재적으로 마스킹할 수 있다. 이에 반해 linear classifier는, flexibility가 제한적이기 때문에, 이러한 실패를 강조하고 명확한 피드백을 제공할 수 있다는 장점이 있어, 이를 선택한다.
+
+CLIP에서, supervised linear classifier를 훈련하는것은 3.1에서 분석했던 zero-shot classifier과 유사하다는 장점을 가지고 있다.
+
+CLIP의 포괄적인 성능을 평가하기 위해 27개의 서로 다른 데이터 세트에서 66개의 서로 다른 모델을 연구하려면 1782개의 서로 다른 평가를 조정해야 한다.
+
+Fine-tuning은 다양한 기법 세트를 공정하게 평가하는 것이 계산 비용이 많이 든다. 이에 비해 선형 분류기는 최소한의 하이퍼 파라미터 튜닝이 필요하고 표준화된 구현 및 평가 절차가 있다.
+
+Figure 10으로 인해 알 수 있는 사실
+
+- 작은 CLIP 모델 성능: ResNet-50 및 ResNet-101과 같은 작은 CLIP 모델은 ImageNet-1K에서 훈련된 다른 ResNet보다 성능이 뛰어나지만, ImageNet-21K에서 훈련된 ResNet (BiT-M)보다는 성능이 낮다.
+- EfficientNet과의 비교: 작은 CLIP 모델은 유사한 컴퓨팅 요구 사항을 가진 EfficientNet 계열의 모델보다 성능이 낮다.
+- CLIP 모델의 스케일링: CLIP로 훈련된 모델은 매우 잘 확장되며, 가장 큰 모델인 ResNet-50x64는 최고의 기존 모델인 Noisy Student EfficientNet-L2보다 전체 점수와 컴퓨팅 효율성에서 약간 더 우수한 성능을 가진다.
+- ViT의 효율성: CLIP ViT는 CLIP ResNet보다 약 3배 더 컴퓨팅 효율적이며, 이는 주어진 컴퓨팅 예산 내에서 더 높은 성능을 달성할 수 있게 한다.
+- ViT의 효율성 재현: 충분히 큰 데이터셋에서 훈련된 경우 ViT가 CNN보다 더 효율적이라는 것을 확인하였습니다.
+- 최고 성능 모델: 336 픽셀 해상도로 1 에폭 추가 훈련된 ViT-L/14 모델이 12개 데이터셋 평가 세트에서 기존 최고의 모델을 평균 2.6%의 성능 향상으로 능가합니다.
+
+CLIP 모델은 무작위 초기화로부터 끝까지 훈련된 단일 컴퓨터 비전 모델에서 이전에 시연된 것보다 더 넓은 작업 세트 (지리적 위치 확인(geo-localization), 광학 문자 인식(optical character recognition), 얼굴 감정 인식(facial emotion recognition), 행동 인식(action recognition) 등) 도 학습이 가능하다.
+
+하지만 기존의 12개의 dataset 평가에는 이러한 부분이 없으므로, 새로운 27개 데이터셋 평가 세트에서 성능을 측정했고, Figure 11에 이에 대한 내용을 담고 있다.
+
+넓은 평가 범위에서, CLIP은 다음과 같은 장점을 가지고 있다.
+
+- 컴퓨팅 효율성: 모든 CLIP 모델은 규모에 상관없이 컴퓨팅 효율성 측면에서 모든 평가된 시스템을 능가한다.
+- 평균 점수 향상: 최고의 모델이 이전 시스템보다 평균 점수에서 2.6%에서 5% 정도 향상됩니다.
+- 자가 지도 학습 시스템 성능: self-supervised learning 시스템이 더 넓은 평가 세트에서 눈에 띄게 더 좋은 성능을 보입니다.
+- SimCLRv2 성능: SimCLRv2는 12개 데이터셋에서 BiT-M보다 평균적으로 성능이 떨어지지만, 27개 데이터셋 평가 세트에서는 BiT-M을 능가합니다.
+
+시스템의 "일반적인" 성능을 더 잘 이해하기 위해 작업의 다양성과 커버리지를 계속 확장하는 것이 중요할 것이다.
+
+조금 더 좁은 평가 범위에서 (Noisy Student EfficientNet-L2와 비교)
+
+- CLIP 모델은 27개의 데이터셋 중 21개에서 Noisy Student EfficientNet-L2를 능가한다.
+- 주요 성능 향상 분야:
+    - Optical Character Recognition(OCR) 작업 (SST2, HatefulMemes ..)
+    - Geo-localization, scene recognition (Country211, SUN397)
+    - Activity recognition (Kinetics700, UCF101 ..)
+    - Car and traffic sign recognition (Stanford Cars, GTSRB ..)
+- 세밀한 인식 작업 향상: GTSRB에서 14.7%의 성능 향상은 ImageNet-1K의 지나치게 좁은 감독의 문제를 반영된 결과일 것이라고 예측된다. 단일 레이블로 인해 세부 사항을 놓치는 문제가 있을 수 있다.
+- CLIP은 여전히 여러 데이터셋에서 EfficientNet보다 성능이 낮다.
+- EfficientNet은 CLIP에 비해 ImageNet에서 가장 잘 작동하며, 이는 EfficientNet이 ImageNet에서 훈련되었기 때문이다.
+- EfficientNet은 CIFAR10 및 CIFAR100과 같은 저해상도 데이터셋에서도 약간 더 나은 성능을 보이는데, 이는 CLIP에서 스케일 기반 data argumentation이 부족하기 때문일 수 있다.
+- PatchCamelyon 및 CLEVRCounts와 같은 데이터셋에서는 두 접근 방식 모두 성능이 낮지만, EfficientNet이 약간 더 나은 성능을 보인다.
+
 ## 3.3 Robustness to Natural Distribution Shift
 
 > 자연스러운 분포 변화에 대한 견고성을 평가한 결과를 설명합니다. CLIP의 강력한 성능을 입증합니다.
